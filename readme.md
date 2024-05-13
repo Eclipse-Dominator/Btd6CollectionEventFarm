@@ -10,6 +10,6 @@ python3 ./app.py
 
 The keylog_replay file can also function as a custom way to replay macros that one has customly recorded.
 
-You can record a gameplay by running `keylogger.py`. Pressing `L Alt` will begin the recording and `Esc` will terminate the session. 
+You can run a recorded gameplay by running `keylogger.py`. Pressing `L Alt` will begin the recording and `Esc` will terminate the session. 
 
 Afterwards, you should run `utils.py` to get the dimension of your btd6 window and prepend the output to the top of your keylog.
