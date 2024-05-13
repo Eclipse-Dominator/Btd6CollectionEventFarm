@@ -1,6 +1,6 @@
 import pyautogui
 from PIL import Image
-from win32gui import GetClientRect, GetWindowRect
+from win32gui import GetClientRect, GetWindowRect, SetForegroundWindow
 from time import sleep
 
 def get_window_rect(hwnd):
@@ -38,6 +38,9 @@ EXPERT_MAP_POS = {
   (1,1,2): "OUCH"
 }
 
+def focus_game():
+  SetForegroundWindow(game_window[0]._hWnd)
+
 def resize_img(img, scale):
   return img.resize((int(img.width * scale), int(img.height * scale)))
 
@@ -61,7 +64,9 @@ def find_img(img) -> tuple[int, int]:
   '''
   Find the position of the image in the game window
   '''
-  pyautogui.moveTo(g_x, g_y)
+  if (g_x, g_y) < pyautogui.position() < (g_x + g_w, g_y + g_h):
+    # move the mouse out of the game window if it is in the game window
+    pyautogui.moveTo(g_x, g_y)
   game_ss = get_game_ss()
   try:
     return pyautogui.locate(img, game_ss, grayscale=True, confidence=0.82)
