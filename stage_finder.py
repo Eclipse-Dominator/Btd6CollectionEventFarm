@@ -32,19 +32,13 @@ def enter_expert_lvl_select() -> bool:
   Enter expert level select from main menu if not already in it
   return: True if game enters expert_lvl select successfully False otherwise
   '''
-  try:
-    pos = find_img(enter_level_select_icon)
+  if pos:= find_img(enter_level_select_icon):
     click(r2a(pos))
-  except Exception as e:
-    print(e)
-    pass
 
-  try:
-    pos = find_img(toggle_map_icon)
+  if pos := find_img(toggle_map_icon):
     click(r2a(pos))
-  except Exception as e:
-    return False
-  return True
+    return True
+  return False
 
 
 def get_reward_stage(retries = 3) -> tuple[str, tuple[int, int]]:
@@ -89,6 +83,7 @@ def play_stage(pos):
 
   while not find_img(stage_loaded_check_icon):
     if pos := find_img(overwrite_ok_icon):
+      print("\033[KFound existing stage. Overwriting...",)
       click(r2a(pos)) # handles overwrite save scenario
     print("\033[Kwaiting for stage to load...",end='\r')
     sleep(1)
