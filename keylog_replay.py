@@ -5,10 +5,11 @@ Handles converting game recordings to chainable instructions to replay the recor
 #recording is done in 1280x720
 from datetime import datetime, timedelta
 from time import sleep
-import pyautogui
+from pynput.mouse import Button, Controller as MouseController
 from pynput.keyboard import Key, Controller
 from re import match
 keyboard = Controller()
+mouse = MouseController()
 
 key_map = {
   "Key.enter": Key.enter,
@@ -55,9 +56,8 @@ def click(pos_x,pos_y, r_wh):
       print(f"click ({x}, {y})", end='\n' if verbosity > 1 else '\r')
     loc_x = int(x + setting["win_pos"][0])
     loc_y = int(y + setting["win_pos"][1])
-    pyautogui.moveTo(loc_x,loc_y)
-    pyautogui.mouseDown(loc_x,loc_y)
-    pyautogui.mouseUp()
+    mouse.position = (loc_x,loc_y)
+    mouse.click(Button.left)
   return tmp
 
 def keypress(key):

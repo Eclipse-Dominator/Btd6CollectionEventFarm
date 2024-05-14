@@ -2,7 +2,6 @@
 Handles process of finding and entering expert map with collection bonus
 '''
 
-import pyautogui
 from time import sleep
 from utils import *
 from assets import reward_icon, toggle_map_icon, map_box, enter_level_select_icon, expert_page_1_icon, easy_icon, start_stage_icon, stage_loaded_check_icon, overwrite_ok_icon
@@ -35,13 +34,15 @@ def enter_expert_lvl_select() -> bool:
   '''
   try:
     pos = find_img(enter_level_select_icon)
-    pyautogui.click(r2a(pos))
-  except:
+    click(r2a(pos))
+  except Exception as e:
+    print(e)
     pass
 
   try:
+    sleep(1)
     pos = find_img(toggle_map_icon)
-    pyautogui.click(r2a(pos))
+    click(r2a(pos))
   except Exception as e:
     return False
   return True
@@ -58,7 +59,7 @@ def get_reward_stage(retries = 3) -> tuple[str, tuple[int, int]]:
       return pos_to_map(pos), pos
     else:
       toggle_map_pos = wait_til_exists(toggle_map_icon)
-      pyautogui.click(r2a(toggle_map_pos))
+      click(r2a(toggle_map_pos))
   else:
     raise Exception("Failed to find reward stage")
     
@@ -79,20 +80,17 @@ def play_stage(pos):
   '''
   Play the stage with the given map name and relative position
   '''
-  pyautogui.moveTo(r2a(pos))
-  pyautogui.click()
+  click(r2a(pos))
   sleep(0.5)
-  pyautogui.moveTo(r2a(find_img(easy_icon)))
-  pyautogui.click()
+  click(r2a(find_img(easy_icon)))
   sleep(0.5)
   
-  pyautogui.moveTo(r2a(find_img(start_stage_icon)))
-  pyautogui.click()
+  click(r2a(find_img(start_stage_icon)))
   sleep(0.5)
 
   while not find_img(stage_loaded_check_icon):
     if pos := find_img(overwrite_ok_icon):
-      pyautogui.click(r2a(pos)) # handles overwrite save scenario
+      click(r2a(pos)) # handles overwrite save scenario
     print("\033[Kwaiting for stage to load...",end='\r')
     sleep(1)
   print("\033[K",end='') # clear line
