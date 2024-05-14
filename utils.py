@@ -1,10 +1,7 @@
 import pyautogui
 from PIL import Image
-from win32gui import SetForegroundWindow
-from time import sleep
-from winapi_utils import background_screenshot, getWindowInfo
-from pynput.mouse import Button, Controller
-
+from time import sleep, time
+from os_utils import background_screenshot, getWindowInfo, setWindowToForeground, h_mouse
 
 EXPERT_MAP_POS = {
   (0,0,0): "GLACIAL TRAIL",
@@ -24,16 +21,8 @@ EXPERT_MAP_POS = {
 hwnd, g_x,g_y,g_w,g_h = getWindowInfo('BloonsTD6')
 print(f"{g_x}, {g_y}, {g_w}, {g_h},BloonsTD6")
 
-mouse = Controller()
-
-def click(xy):
-  mouse.position = (xy[0], xy[1])
-  mouse.press(Button.left)
-  mouse.release(Button.left)
-  sleep(.1) # let windows process the click
-
 def focus_game():
-  SetForegroundWindow(hwnd)
+  setWindowToForeground(hwnd)
 
 def resize_img(img, scale):
   return img.resize((int(img.width * scale), int(img.height * scale)))
@@ -62,9 +51,9 @@ def find_img(img) -> tuple[int, int]:
   '''
   Find the position of the image in the game window
   '''
-  if (g_x, g_y) < mouse.position < (g_x + g_w, g_y + g_h):
+  if (g_x, g_y) < h_mouse.position < (g_x + g_w, g_y + g_h):
     # move the mouse out of the game window if it is in the game window
-    mouse.position = g_x + g_w, g_y + g_h
+    h_mouse.position = g_x + g_w, g_y + g_h
   game_ss = get_game_ss()
   try:
     s = pyautogui.locate(img, game_ss, grayscale=True, confidence=0.80)
@@ -73,18 +62,15 @@ def find_img(img) -> tuple[int, int]:
     return None
 
 
-def wait_til_exists(img, sleep_time=3, mode_bw=False):
+def wait_til_exists(img, sleep_time=3, timeout=10, mode_bw=False):
   '''
   wait until the image is found in the game window
   '''
-  if mode_bw:
-    while not (pos:=locate_by_white(img)):
-      sleep(sleep_time)
-    return pos
-
-  while not (pos:=find_img(img)):
+  start = time()
+  while not (pos:=locate_by_white(img) if mode_bw == 'bw' else find_img(img)):
     sleep(sleep_time)
-  
+    if time() - start > timeout:
+      raise Exception("Time out while trying to find image")
   return pos
 
 def locate_by_white(img):

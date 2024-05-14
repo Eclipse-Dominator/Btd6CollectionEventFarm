@@ -3,35 +3,29 @@ Plays, complete and exit the stage to main menu
 '''
 
 from keylog_replay import make_instruction, read_keylog, run_instruction, make_setting
-from utils import click, locate_by_white, find_img, wait_til_exists, focus_game, sleep, r2a, g_x, g_y, g_w, g_h
+from utils import locate_by_white, find_img, wait_til_exists, focus_game, sleep, r2a, g_x, g_y, g_w, g_h
+from os_utils import click, press_key
+from pynput.keyboard import Key
 from datetime import datetime
-from assets import success_next_icon, success_home_icon, collect_icon, insta_icon, reward_continue_icon, back_icon, defeat_icon, level_up_icon, restart_icon, restart_btn_icon, overwrite_ok_icon, stage_loaded_check_icon
-from pynput.keyboard import Key, Controller
+import assets as img
 
 def restart_stage():
-  keyboard = Controller()
   focus_game()
-  while not(pos := find_img(restart_btn_icon)):
-    keyboard.press(Key.esc)
-    keyboard.release(Key.esc)
+  while not(pos := find_img(img.restart_btn_icon)):
+    press_key(Key.esc)
     sleep(.6)
   
   click(r2a(pos))
-  click(r2a(wait_til_exists(restart_icon)))
-  wait_til_exists(stage_loaded_check_icon)
+  click(r2a(wait_til_exists(img.restart_icon)))
+  wait_til_exists(img.stage_loaded_check_icon)
 
 def resume_stage():
-  keyboard = Controller()
   focus_game()
-  keyboard.press(Key.esc)
-  keyboard.release(Key.esc)
+  press_key(Key.esc)
   sleep(1)
-  keyboard.press(Key.space)
-  keyboard.release(Key.space)
+  press_key(Key.esc)
   sleep(.5)
-  keyboard.press(Key.space)
-  keyboard.release(Key.space)
-
+  press_key(Key.esc)
 
 def run_stage(record_path, verbosity=1, post_ins_sleep=120):
   window_setting = make_setting(datetime.now(), (g_x, g_y), (g_w, g_h))
@@ -45,35 +39,42 @@ def run_stage(record_path, verbosity=1, post_ins_sleep=120):
   sleep(post_ins_sleep)
 
 def check_completion():
-  if find_img(success_next_icon):
+  if find_img(img.success_next_icon):
     print("\033[KStage completed!")
     return True
-  if find_img(defeat_icon):
+  if find_img(img.defeat_icon):
     raise Exception("Stage failed, restarting...")
-  if find_img(level_up_icon):
+  if find_img(img.level_up_icon):
     resume_stage()
   return False
 
 def return_to_home():
   focus_game()
-  click(r2a(wait_til_exists(success_next_icon)))
-  click(r2a(wait_til_exists(success_home_icon)))
+  for _ in range(3):
+    try:
+      click(r2a(wait_til_exists(img.success_next_icon)))
+      click(r2a(wait_til_exists(img.success_home_icon)))
+      break
+    except Exception as e:
+      print(e)
+
   sleep(4) # leave 5 sec buffer for collection of instas to appear
-  if pos := find_img(collect_icon):
+  
+  if pos := find_img(img.collect_icon):
     collect_instas(pos)
 
 def collect_instas(continue_pos):
   click(r2a(continue_pos))
-  wait_til_exists(insta_icon, mode_bw=True) # wait for insta icon to appear
+  wait_til_exists(img.insta_icon, mode_bw=True) # wait for insta icon to appear
   print("Collecting instas")
-  while pos:=locate_by_white(insta_icon):
+  while pos:=locate_by_white(img.insta_icon):
     click(r2a(pos))
     sleep(1)
     click(r2a(pos))
     sleep(1)
   
-  click(r2a(wait_til_exists(reward_continue_icon)))
-  click(r2a(wait_til_exists(back_icon)))
+  click(r2a(wait_til_exists(img.reward_continue_icon)))
+  click(r2a(wait_til_exists(img.back_icon)))
 
 if __name__ == "__main__":
   return_to_home()
