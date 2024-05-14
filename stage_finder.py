@@ -40,7 +40,6 @@ def enter_expert_lvl_select() -> bool:
     pass
 
   try:
-    sleep(1)
     pos = find_img(toggle_map_icon)
     click(r2a(pos))
   except Exception as e:

@@ -30,6 +30,7 @@ def click(xy):
   mouse.position = (xy[0], xy[1])
   mouse.press(Button.left)
   mouse.release(Button.left)
+  sleep(.1) # let windows process the click
 
 def focus_game():
   SetForegroundWindow(hwnd)

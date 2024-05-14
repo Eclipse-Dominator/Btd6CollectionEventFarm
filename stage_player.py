@@ -58,7 +58,7 @@ def return_to_home():
   focus_game()
   click(r2a(wait_til_exists(success_next_icon)))
   click(r2a(wait_til_exists(success_home_icon)))
-  sleep(5) # leave 5 sec buffer for collection of instas to appear
+  sleep(4) # leave 5 sec buffer for collection of instas to appear
   if pos := find_img(collect_icon):
     collect_instas(pos)
 
@@ -76,6 +76,7 @@ def collect_instas(continue_pos):
   click(r2a(wait_til_exists(back_icon)))
 
 if __name__ == "__main__":
-  run_stage("INFERNAL")
+  return_to_home()
+  # run_stage("INFERNAL")
 
 # print("checking...", find_img(success_next_icon))
