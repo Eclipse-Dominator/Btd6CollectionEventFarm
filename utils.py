@@ -1,27 +1,10 @@
 import pyautogui
 from PIL import Image
-from win32gui import GetClientRect, GetWindowRect, SetForegroundWindow
+from win32gui import SetForegroundWindow
 from time import sleep
+from winapi_utils import background_screenshot, getWindowInfo
+from pynput.mouse import Button, Controller
 
-def get_window_rect(hwnd):
-    client_rect = GetClientRect(hwnd)
-    window_rect = GetWindowRect(hwnd)
-    # Convert client area dimensions to window dimensions
-    window_width = client_rect[2] - client_rect[0]
-    window_height = client_rect[3] - client_rect[1]
-
-    win_margin = ((window_rect[2] - window_rect[0]) - (client_rect[2] - client_rect[0])) // 2
-    border_height = (window_rect[3] - window_rect[1]) - (client_rect[3] - client_rect[1]) - win_margin
-    
-    # Calculate the position of the top-left corner of the borderless window
-    left = window_rect[0] + win_margin
-    top = window_rect[1] + border_height
-
-    return left, top, window_width, window_height
-
-game_window = pyautogui.getWindowsWithTitle('BloonsTD6')
-g_x,g_y,g_w,g_h = get_window_rect(game_window[0]._hWnd)
-print(f"{g_x}, {g_y}, {g_w}, {g_h},BloonsTD6")
 
 EXPERT_MAP_POS = {
   (0,0,0): "GLACIAL TRAIL",
@@ -38,8 +21,18 @@ EXPERT_MAP_POS = {
   (1,1,2): "OUCH"
 }
 
+hwnd, g_x,g_y,g_w,g_h = getWindowInfo('BloonsTD6')
+print(f"{g_x}, {g_y}, {g_w}, {g_h},BloonsTD6")
+
+mouse = Controller()
+
+def click(xy):
+  mouse.position = (xy[0], xy[1])
+  mouse.press(Button.left)
+  mouse.release(Button.left)
+
 def focus_game():
-  SetForegroundWindow(game_window[0]._hWnd)
+  SetForegroundWindow(hwnd)
 
 def resize_img(img, scale):
   return img.resize((int(img.width * scale), int(img.height * scale)))
@@ -52,24 +45,29 @@ def rel_to_abs(rel_pos) -> tuple[int, int]:
 
 r2a = rel_to_abs
 
-def get_game_ss() -> Image.Image:
+def get_game_ss(retries=3) -> Image.Image:
   '''
   Get screenshot of the current game window
   '''
-  game_ss = pyautogui.screenshot(region=(g_x, g_y, g_w, g_h))
-  
-  return game_ss
+  for _ in range(retries):
+    try:
+      return background_screenshot(hwnd, g_w, g_h)
+    except Exception as e:
+      pass
+
+  raise Exception("Failed to take screenshot:", e)
 
 def find_img(img) -> tuple[int, int]:
   '''
   Find the position of the image in the game window
   '''
-  if (g_x, g_y) < pyautogui.position() < (g_x + g_w, g_y + g_h):
+  if (g_x, g_y) < mouse.position < (g_x + g_w, g_y + g_h):
     # move the mouse out of the game window if it is in the game window
-    pyautogui.moveTo(g_x, g_y)
+    mouse.position = g_x + g_w, g_y + g_h
   game_ss = get_game_ss()
   try:
-    return pyautogui.locate(img, game_ss, grayscale=True, confidence=0.82)
+    s = pyautogui.locate(img, game_ss, grayscale=True, confidence=0.82)
+    return s
   except Exception as e:
     return None
 
