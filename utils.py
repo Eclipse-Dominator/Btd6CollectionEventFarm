@@ -67,7 +67,7 @@ def find_img(img) -> tuple[int, int]:
     mouse.position = g_x + g_w, g_y + g_h
   game_ss = get_game_ss()
   try:
-    s = pyautogui.locate(img, game_ss, grayscale=True, confidence=0.82)
+    s = pyautogui.locate(img, game_ss, grayscale=True, confidence=0.80)
     return s
   except Exception as e:
     return None

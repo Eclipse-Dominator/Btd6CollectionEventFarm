@@ -1,5 +1,4 @@
-import win32gui
-from win32gui import GetClientRect, GetWindowRect
+from win32gui import GetClientRect, GetWindowRect, GetWindowDC, DeleteObject, ReleaseDC, FindWindow, ShowWindow, SetForegroundWindow
 from win32ui import CreateDCFromHandle, CreateBitmap
 from ctypes import windll
 from PIL import Image
@@ -21,7 +20,7 @@ def get_window_rect(hwnd):
     return left, top, window_width, window_height
 
 def background_screenshot(hwnd, w, h) -> Image.Image:
-  hwndDC = win32gui.GetWindowDC(hwnd)
+  hwndDC = GetWindowDC(hwnd)
   mfcDC  = CreateDCFromHandle(hwndDC)
   saveDC = mfcDC.CreateCompatibleDC()
 
@@ -39,15 +38,20 @@ def background_screenshot(hwnd, w, h) -> Image.Image:
       (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
       bmpstr, 'raw', 'BGRX', 0, 1)
 
-  win32gui.DeleteObject(saveBitMap.GetHandle())
+  DeleteObject(saveBitMap.GetHandle())
   saveDC.DeleteDC()
   mfcDC.DeleteDC()
-  win32gui.ReleaseDC(hwnd, hwndDC)
+  ReleaseDC(hwnd, hwndDC)
 
   if result == 0:
     raise Exception("Failed to take screenshot")
   return im
 
 def getWindowInfo(title):
-  hwnd = win32gui.FindWindow(None, title)
+  hwnd = FindWindow(None, title)
+  setWindowToForeground(hwnd)
   return hwnd, *get_window_rect(hwnd)
+
+def setWindowToForeground(hwnd):
+  ShowWindow(hwnd, 5)
+  SetForegroundWindow(hwnd)
