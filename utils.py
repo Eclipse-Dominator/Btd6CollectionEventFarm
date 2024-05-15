@@ -67,7 +67,7 @@ def wait_til_exists(img, sleep_time=3, timeout=10, mode_bw=False):
   wait until the image is found in the game window
   '''
   start = time()
-  while not (pos:=locate_by_white(img) if mode_bw == 'bw' else find_img(img)):
+  while not (pos:=locate_by_white(img) if mode_bw else find_img(img)):
     sleep(sleep_time)
     if time() - start > timeout:
       raise Exception("Time out while trying to find image")

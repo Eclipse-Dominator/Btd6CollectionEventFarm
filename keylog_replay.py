@@ -5,9 +5,10 @@ Handles converting game recordings to chainable instructions to replay the recor
 #recording is done in 1280x720
 from datetime import datetime, timedelta
 from time import sleep
-from pynput.keyboard import Key
+import pyautogui
+from pynput.keyboard import Key, Controller
 from re import match
-from os_utils import click, press_key
+keyboard = Controller()
 
 key_map = {
   "Key.enter": Key.enter,
@@ -44,7 +45,7 @@ def wait_until(time):
       print(f"\033[Kins {i}: Waited for {wait_time} to run ", end='')
   return tmp
 
-def click_ins(pos_x,pos_y, r_wh):
+def click(pos_x,pos_y, r_wh):
   r_w,r_h = r_wh
   def tmp(i,setting,verbosity):
     w,h = setting["wh"]
@@ -54,15 +55,18 @@ def click_ins(pos_x,pos_y, r_wh):
       print(f"click ({x}, {y})", end='\n' if verbosity > 1 else '\r')
     loc_x = int(x + setting["win_pos"][0])
     loc_y = int(y + setting["win_pos"][1])
-    click((loc_x, loc_y))
+    pyautogui.moveTo(loc_x,loc_y)
+    pyautogui.mouseDown(loc_x,loc_y)
+    pyautogui.mouseUp()
   return tmp
 
-def keypress_ins(key):
+def keypress(key):
   btn = key_map.get(key, key[1])
   def tmp(i,setting,verbosity):
     if verbosity > 0:
       print(f"press '{btn}'", end='\n' if verbosity > 1 else '\r')
-    press_key(btn)
+    keyboard.press(btn)
+    keyboard.release(btn)
   return tmp
 
 def make_instruction(data, setting):
@@ -79,13 +83,13 @@ def make_instruction(data, setting):
     instructions.append(wait_until(t))
     if len(line) == 3:
       # keypress
-      instructions.append(keypress_ins(line[2]))
+      instructions.append(keypress(line[2]))
     else:
       # find (x, y) in line with regex
       m = match(r".*\((\d+), (\d+)\).*", line[1])
       x,y = int(m.group(1)), int(m.group(2))
       x,y = translate(x,y)
-      instructions.append(click_ins(x,y, (g_w, g_h)))
+      instructions.append(click(x,y, (g_w, g_h)))
 
   return instructions
 
