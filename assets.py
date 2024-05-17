@@ -45,3 +45,11 @@ defeat_icon = resize_img(defeat_icon, scale)
 restart_icon = resize_img(restart_icon, scale)
 restart_btn_icon = resize_img(restart_btn_icon, scale)
 
+# instamonkey coordinates recorded in 1280x720 window size
+insta_xy = [
+  [scale * 958, 275 * scale],
+  [scale * 1040, 275 * scale],
+  [scale * 1040, 351 * scale],
+  [scale * 958, 351 * scale],
+]
+

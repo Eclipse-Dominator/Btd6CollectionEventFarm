@@ -8,6 +8,7 @@ from os_utils import click, press_key
 from pynput.keyboard import Key
 from datetime import datetime
 import assets as img
+from random import randint
 
 def restart_stage():
   focus_game()
@@ -64,6 +65,7 @@ def return_to_home():
     collect_instas(pos)
 
 def collect_instas(continue_pos):
+  click(r2a(img.insta_xy[randint(0, 3)])) # select a randomly available insta
   click(r2a(continue_pos))
   wait_til_exists(img.insta_icon, mode_bw=True) # wait for insta icon to appear
   print("Collecting instas")
